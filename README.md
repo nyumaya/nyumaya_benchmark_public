@@ -8,10 +8,13 @@ pip install pydub
 # Running the benchmark
 
 1. Set your data locations in config.py
-2. Populate the noise folder with the demand dataset
-3. Download the scenarios (sh download_scenarios.sh)
-4. Run the benchmark python3 benchmark.py alexa 2.0.23
-5. The results are written to the result_folder
+2. Point nyumaya_basepath to the nyumaya_audio_recognition repository
+ or clone it to the pointed path (./nyumaya_audio_recognition/)
+3. Populate the noise folder with the demand dataset
+4. Download the scenarios (sh download_scenarios.sh)
+5. Ensure your model is in the nyumaya_audio_recognition/models/Hotword folder
+6. Run the benchmark python3 benchmark.py alexa 2.0.23
+7. The results are written to the result_folder
 
 
 # Scenarios
