@@ -117,8 +117,7 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx,resultInst):
 			noise = effects.normalize(noise)
 			noise = noise.apply_gain(-snr)
 
-			else:
-				wavdata = wavdata.overlay(noise, gain_during_overlay=0)
+			wavdata = wavdata.overlay(noise, gain_during_overlay=0)
 
 		wavdata = wavdata.get_array_of_samples().tobytes()
 		splitdata = split_sequence(wavdata,bufsize)
