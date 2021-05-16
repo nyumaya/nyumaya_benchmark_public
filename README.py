@@ -8,10 +8,10 @@ pip install pydub
 # Running the benchmark
 
 1. Set your data locations in config.py
-1. Populate the noise folder with the demand dataset
-1. Download the scenarios (sh download_scenarios.sh)
-1. Run the benchmark python3 benchmark.py alexa 2.0.23
-1. The results are written to the result_folder
+2. Populate the noise folder with the demand dataset
+3. Download the scenarios (sh download_scenarios.sh)
+4. Run the benchmark python3 benchmark.py alexa 2.0.23
+5. The results are written to the result_folder
 
 
 # Scenarios
