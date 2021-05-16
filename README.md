@@ -22,6 +22,16 @@ reasons the audio is preprocessed and the extracted features are
 stored in a tfrecord file. This way we can evaluate different scenarios
 quickly and efficienlty.
 
+Currently two scenarios are availabled
+
+1. libri_test_v1.0
+Test part of the LibriTTS dataset(https://research.google/tools/datasets/libri-tts/)
+English read speech
+
+2. ambient_test_v1.0
+Ambient Noises partly taken from public domain sounds of freesound. It consists
+mostly of longer recordings of fireworks, beach sounds, rain, wind, shower etc.
+No intelligle speech is present.
 
 ## Adding own scenarios
 
