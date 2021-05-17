@@ -25,6 +25,10 @@ nyumaya_lib_path = os.path.join("./nyumaya_audio_recognition/python/src/",defaul
 
 seed(1234)
 
+def usage():
+	print("benchmark.py <keyword> <version>")
+	print("Example: python3 benchmark.py 'view glass' 2.0.23")
+
 def include_random_folder(path):
 	file_list=[]
 	for root, _, files in walk(path):
@@ -195,6 +199,12 @@ def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx,resultInst
 
 	resultInst.setFalseActivations(szenIdx,sensIdx,false_alarms_per_hour)
 
+
+
+if(len(sys.argv) != 3):
+	usage()
+	exit(1)
+
 version=None
 
 processes = []
@@ -209,6 +219,7 @@ keyword = keyword.lower()
 version = sys.argv[2]
 outfile = '{}_v{}.txt'.format(keyword,version)
 outfile = os.path.join(result_folder,outfile)
+
 
 
 #Clean Accuracy
