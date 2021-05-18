@@ -1,7 +1,6 @@
 import sys
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = ''
-import tensorflow as tf
+
 import glob
 from config import *
 
@@ -17,19 +16,20 @@ from os.path import join
 from random import randint, seed
 from auto_platform import default_libpath
 from utils import *
-from multiprocessing import Process,Manager
-from multiprocessing.managers import BaseManager
+from multiprocessing import Process,Queue
 from benchmarkResult import *
 
 nyumaya_lib_path = os.path.join("./nyumaya_audio_recognition/python/src/",default_libpath)
 
-
+resultQueue = Queue()
+benchmarkResultQueue = Queue()
 
 def usage():
 	print("benchmark.py <keyword> <version>")
 	print("Example: python3 benchmark.py 'view glass' 2.0.23")
 
-def include_random_folder(path):
+# Add all audio files to file list
+def include_wavs_from_folder(path):
 	file_list=[]
 	for root, _, files in walk(path):
 		for f in files:
@@ -47,44 +47,23 @@ def split_sequence(a,seg_length):
 	return [a[x:x+seg_length] for x in range(0,len(a),seg_length)]
 
 
-def decode_szenario(serialized_example):
 
-	features = tf.io.parse_single_example(
-		serialized_example,
-		features={
-		'meldata': tf.io.FixedLenFeature([], tf.string),
-		'utf_text':  tf.io.FixedLenFeature([], tf.string),
-	})
-
-	meldata = tf.io.decode_raw(features['meldata'], tf.uint8)
-	text = tf.io.decode_raw(features['utf_text'], tf.uint8)
-
-	return meldata,text
-
-def include_good_folder(path,keyword):
-	file_list = []
-	for root, _, files in walk(path):
-		for f in files:
-			extension = splitext(f)[1].lower()
-			if extension in extension_list:
-				file_list.append(os.path.join(root,f))
-
-	return file_list
-
-def run_good(keyword,add_noise,version,noiseIdx,sensIdx,resultInst):
+# Run positive examples. Each positive example is surrounded by a short
+# silence. 
+def run_good(keyword,add_noise,version,noiseIdx,sensIdx):
 
 	seed(1234)
 	sensitivity = sensitivitys[sensIdx]
 	snr = noise_levels[noiseIdx-1]
 
 	records_path = os.path.join(keyword_folder,keyword)
-	filelist = include_good_folder(records_path,keyword)
+	filelist = include_wavs_from_folder(records_path)
 
+	print("Positive samples: {}".format(len(filelist)))
 	detector = AudioRecognition(nyumaya_lib_path)
 	extractor = FeatureExtractor(nyumaya_lib_path)
 
 	modelpath = os.path.join(nyumaya_basepath,"models/Hotword/{}_v{}.premium".format(keyword,version))
-	print("Model path: {}".format(modelpath))
 	detector.addModel(modelpath,sensitivity)
 
 	samplenumber = 0
@@ -95,15 +74,17 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx,resultInst):
 	if(add_noise):
 		for noise_folder in noise_folder_list:
 			if(os.path.exists(noise_folder)):
-				noise_list += include_random_folder(noise_folder)
+				noise_list += include_wavs_from_folder(noise_folder)
 
 	bufsize = detector.getInputDataSize() * 2
-	print(bufsize)
+
 	for f in filelist:
 
 		wavdata,_ = load_audio_file(f)
 		if(not wavdata):
-			continue
+			#Better abort than get a wrong result
+			print("Could not load file {}".format(f))
+			exit(0)
 
 		silence = AudioSegment.silent(duration=1000)
 		wavdata = silence + wavdata + silence
@@ -142,24 +123,58 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx,resultInst):
 		samplenumber += 1
 	accuracy = detectionnumber / samplenumber
 
+	result = {"type": "accuracy","noiseIdx":noiseIdx,"sensIdx": sensIdx,"value":accuracy}
+	resultQueue.put(result)
 	print("{:.3f} @ {}".format(accuracy,sensitivity))
-	resultInst.setAccuracy(noiseIdx,sensIdx,accuracy)
 
+# Gather the results from all worker processes
+# and write them to the benchmark Result
+def interpretResult():
+	bResult = benchmarkResult()
+	while(True):
+		result = resultQueue.get()
+		if(result["type"] == "accuracy"):
+			bResult.setAccuracy(result["noiseIdx"],result["sensIdx"],result["value"])
+		elif (result["type"] == "falseActivation"):
+			bResult.setFalseActivations(result["szenIdx"],result["sensIdx"],result["value"])
+		elif (result["type"] == "finished"):
+			break
+		else:
+			print("Invalid result type {}".format(result["type"]))
+			exit(1)
 
+	benchmarkResultQueue.put(bResult)
 
-def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx,resultInst):
+# Run a szenario which do not contain positive examples.
+# So each activation is a false positive
+def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx):
+	os.environ['CUDA_VISIBLE_DEVICES'] = ''
+	from tensorflow import io as tfio
+	from tensorflow import data as tfdata
+	from tensorflow import data as tfdata
+	from tensorflow import string as tfstring
+	from tensorflow import uint8 as tfuint8
+
+	# Decode data from szenario tfrecord
+	def decode_szenario(serialized_example):
+
+		features = tfio.parse_single_example(
+			serialized_example,
+			features={
+			'meldata': tfio.FixedLenFeature([], tfstring),
+			'utf_text': tfio.FixedLenFeature([], tfstring),
+		})
+
+		meldata = tfio.decode_raw(features['meldata'], tfuint8)
+		text = tfio.decode_raw(features['utf_text'], tfuint8)
+
+		return meldata,text
 
 	detector = AudioRecognition(nyumaya_lib_path)
-	modelpath = os.path.join(nyumaya_basepath,"models/Hotword/{}_v{}.premium".format(keyword,version))
-	print("Model path: {}".format(modelpath))
-	if(not os.path.exists(modelpath)):
-		print("Failed: {}".format(modelpath))
-		return -1
-
 	detector.addModel(modelpath,sensitivity)
 
 	dataset = glob.glob(os.path.join(szenario_basepath,"{}.tfrecords".format(szenario)))
-	dataset = tf.data.TFRecordDataset([dataset])
+	dataset = tfdata.TFRecordDataset([dataset])
 	false_alarms_per_hour = 0.0
 	run_seconds = 0
 	run_frames = 0
@@ -198,8 +213,8 @@ def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx,resultInst
 	print("Run Hours: {}".format(run_hours))
 	print("False Alarms per hour {} @ {}".format(false_alarms_per_hour,sensitivity))
 
-	resultInst.setFalseActivations(szenIdx,sensIdx,false_alarms_per_hour)
-
+	result = {"type": "falseActivation","szenIdx":szenIdx,"sensIdx": sensIdx,"value":false_alarms_per_hour}
+	resultQueue.put(result)
 
 
 if(len(sys.argv) != 3):
@@ -208,12 +223,7 @@ if(len(sys.argv) != 3):
 
 version=None
 
-processes = []
-
-BaseManager.register('benchmarkResult', benchmarkResult)
-manager = BaseManager()
-manager.start()
-result = manager.benchmarkResult()
+workers = []
 
 keyword = sys.argv[1]
 keyword = keyword.lower()
@@ -221,31 +231,45 @@ version = sys.argv[2]
 outfile = '{}_v{}.txt'.format(keyword,version)
 outfile = os.path.join(result_folder,outfile)
 
+modelpath = os.path.join(nyumaya_basepath,"models/Hotword/{}_v{}.premium".format(keyword,version))
+print("Model path: {}".format(modelpath))
 
+if(not os.path.exists(modelpath)):
+	print("Model does not exist: {}".format(modelpath))
+	os.exit(1)
 
 #Clean Accuracy
 for sensIdx,sens in enumerate(sensitivitys):
-	p = Process(target=run_good, args=(keyword,False,version,0,sensIdx,result))
-	processes.append(p)
+	p = Process(target=run_good, args=(keyword,False,version,0,sensIdx))
+	workers.append(p)
 
 #Noisy Accuracy
 for noiseIdx,level in enumerate(noise_levels):
 	for sensIdx,sens in enumerate(sensitivitys):
-		p = Process(target=run_good, args=(keyword,True,version,noiseIdx+1,sensIdx,result))
-		processes.append(p)
+		p = Process(target=run_good, args=(keyword,True,version,noiseIdx+1,sensIdx))
+		workers.append(p)
 
 for szenIdx,szen in enumerate(szenarios):
 	for sensIdx,sens in enumerate(sensitivitys):
-		p = Process(target=run_szenario, args=(szen,sens,keyword,version,szenIdx,sensIdx,result))
-		processes.append(p)
+		p = Process(target=run_szenario, args=(szen,sens,keyword,version,szenIdx,sensIdx))
+		workers.append(p)
 
-for pr in processes:
+
+# FIXME: Modify starting processes so cpu_count is never
+# exceeded.
+for pr in workers:
 	pr.start()
 
-for pr in processes:
+interpreter = Process(target=interpretResult, args=())
+interpreter.start()
+
+for pr in workers:
 	pr.join()
 
+resultQueue.put({"type": "finished"})
+interpreter.join()
 
+result = benchmarkResultQueue.get()
 result.write(outfile)
 
 
