@@ -23,7 +23,7 @@ from benchmarkResult import *
 
 nyumaya_lib_path = os.path.join("./nyumaya_audio_recognition/python/src/",default_libpath)
 
-seed(1234)
+
 
 def usage():
 	print("benchmark.py <keyword> <version>")
@@ -40,7 +40,7 @@ def include_random_folder(path):
 
 def get_random_file(file_list):
 	filelen = len(file_list)
-	index  = randint(0,filelen-1)
+	index = randint(0,filelen-1)
 	return file_list[index]
 
 def split_sequence(a,seg_length):
@@ -73,6 +73,7 @@ def include_good_folder(path,keyword):
 
 def run_good(keyword,add_noise,version,noiseIdx,sensIdx,resultInst):
 
+	seed(1234)
 	sensitivity = sensitivitys[sensIdx]
 	snr = noise_levels[noiseIdx-1]
 
