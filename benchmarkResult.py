@@ -1,13 +1,14 @@
 
 from config import *
 import numpy as np
+
 class benchmarkResult:
 
 	def __init__(self):
 		sensCount = len(sensitivitys)
-		self.accuracy = np.zeros(((len(noise_levels)+1), sensCount))
-		self.falseActivations = np.zeros((len(szenarios), sensCount))
-
+		self.accuracy = np.ones(((len(noise_levels)+1), sensCount)) * -1
+		self.falseActivations = np.ones((len(szenarios), sensCount)) * -1
+	
 	def setAccuracy(self,noiseIdx,sensIdx,value):
 		self.accuracy[noiseIdx][sensIdx] = value
 	
