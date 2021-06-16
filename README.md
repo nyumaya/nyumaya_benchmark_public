@@ -1,3 +1,5 @@
+# Contributing
+Suggestions, pull requests are very welcome. Feel free to open an issue.
 
 # Benchmark Goals
 - Fast
