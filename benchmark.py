@@ -115,7 +115,7 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx):
 			features = extractor.signalToMel(frame)
 			prediction = detector.runDetection(features)
 
-			if(prediction != 0):
+			if(prediction != 0 and prediction != -1):
 				has_detected_something = True
 
 		if(has_detected_something == True):
@@ -197,7 +197,7 @@ def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx):
 		frames = split_sequence(mel,framelen)
 		for frame in frames:
 			prediction = detector.runDetection(frame)
-			if(prediction != 0):
+			if(prediction != 0 and prediction != -1):
 				try:
 					text = text.numpy().tobytes().decode('utf-8')
 					print("False Alarm:{} {}".format(prediction,text))
