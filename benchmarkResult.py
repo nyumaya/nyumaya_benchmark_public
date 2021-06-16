@@ -33,7 +33,7 @@ class benchmarkResult:
 
 			result_file.write("\n")
 			for idx,level in enumerate(noise_levels):
-				result_file.write("Accuracy noisy ({} db) \n".format(noise_levels[idx]))
+				result_file.write("Accuracy noisy ({} db Signal-to-noise ratio) \n".format(noise_levels[idx]))
 				for sensIdx,sens in enumerate(sensitivitys):
 					result_file.write("{:.4f} @ {} \n".format(self.accuracy[idx+1][sensIdx],sens))
 				
