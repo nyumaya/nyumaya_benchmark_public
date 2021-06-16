@@ -1,4 +1,11 @@
 
+# Benchmark Goals
+- Fast
+- Error Free
+- Able to run different scenarios
+- Graphical output for easy interpretation
+- As simple as possible
+
 # Requirements
 
 pip install tensorflow
