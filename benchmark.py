@@ -190,7 +190,9 @@ def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx):
 
 		framelen_v2 = 640
 		framelen_v1 = 800
-		framelen = framelen_v2  #FIXME Hardcoded
+		framelen = framelen_v1
+		if(bufsize == 5200):
+			framelen = framelen_v2
 
 		frames = split_sequence(mel,framelen)
 		for frame in frames:
