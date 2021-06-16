@@ -1,3 +1,12 @@
+# Contributing
+Suggestions, pull requests are very welcome. Feel free to open an issue.
+
+# Benchmark Goals
+- Fast
+- Error Free
+- Able to run different scenarios
+- Graphical output for easy interpretation
+- As simple as possible
 
 # Requirements
 
