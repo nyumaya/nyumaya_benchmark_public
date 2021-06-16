@@ -1,6 +1,7 @@
 
 from config import *
 import numpy as np
+import subprocess
 
 class benchmarkResult:
 
@@ -17,7 +18,15 @@ class benchmarkResult:
 
 	def write(self,outfile):
 
+		gitId = "unknown"
+		try:
+			gitId = subprocess.check_output(["git", "rev-parse" ,"HEAD"]).strip()
+		except:
+			print("Failed to get git id")
+
+
 		with open(outfile, "w+") as result_file:
+			result_file.write("Git Commit Id: {}\n".format(gitId))
 			result_file.write("Accuracy clean \n")
 			for sensIdx,sens in enumerate(sensitivitys):
 				result_file.write("{:.4f} @ {} \n".format(self.accuracy[0][sensIdx],sens))
