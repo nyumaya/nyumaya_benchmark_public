@@ -19,7 +19,8 @@ from utils import *
 from multiprocessing import Process,Queue
 from benchmarkResult import *
 
-nyumaya_lib_path = os.path.join("./nyumaya_audio_recognition/python/src/",default_libpath)
+nyumaya_dir =  os.path.join(nyumaya_basepath,"python/src/")
+nyumaya_lib_path = os.path.join(nyumaya_dir,default_libpath)
 
 resultQueue = Queue()
 benchmarkResultQueue = Queue()
