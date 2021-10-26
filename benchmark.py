@@ -138,6 +138,8 @@ def interpretResult():
 			bResult.setAccuracy(result["noiseIdx"],result["sensIdx"],result["value"])
 		elif (result["type"] == "falseActivation"):
 			bResult.setFalseActivations(result["szenIdx"],result["sensIdx"],result["value"])
+		elif (result["type"] == "runHours"):
+			bResult.setRunHours(result["szenIdx"],result["value"])
 		elif (result["type"] == "finished"):
 			break
 		else:
@@ -218,7 +220,9 @@ def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx):
 
 	result = {"type": "falseActivation","szenIdx":szenIdx,"sensIdx": sensIdx,"value":false_alarms_per_hour}
 	resultQueue.put(result)
-
+	
+	result = {"type": "runHours","szenIdx":szenIdx,"value":run_hours}
+	resultQueue.put(result)
 
 if(len(sys.argv) != 3):
 	usage()

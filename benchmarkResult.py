@@ -9,12 +9,17 @@ class benchmarkResult:
 		sensCount = len(sensitivitys)
 		self.accuracy = np.ones(((len(noise_levels)+1), sensCount)) * -1
 		self.falseActivations = np.ones((len(szenarios), sensCount)) * -1
-	
+		self.runHours = np.ones(len(szenarios)) * -1
+
 	def setAccuracy(self,noiseIdx,sensIdx,value):
 		self.accuracy[noiseIdx][sensIdx] = value
 	
 	def setFalseActivations(self,szenIdx,sensIdx,value):
 		self.falseActivations[szenIdx,sensIdx] = value
+
+	def setRunHours(self,szenIdx,value):
+		self.runHours[szenIdx] = value
+
 
 	def write(self,outfile):
 
@@ -41,6 +46,7 @@ class benchmarkResult:
 
 			for idx,szen in enumerate(szenarios):
 				result_file.write("\n\nFalse alarms per hour: {}\n".format(szen))
+				result_file.write("Szenario length: {:.4f} hours\n".format(self.runHours[idx]))
 				for sensIdx,sens in enumerate(sensitivitys):
 					result_file.write("{:.4f} @ {} \n".format(self.falseActivations[idx][sensIdx],sens))
 
