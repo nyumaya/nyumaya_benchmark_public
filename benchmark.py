@@ -117,12 +117,13 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx):
 			print("Could not load file {}".format(f))
 			exit(0)
 
-		silence = AudioSegment.silent(duration=1000)
-		wavdata = silence + wavdata + silence
 
-		#FIXME: Find a better way to normalize the noise
-		# level relative to the speech level
-		#wavdata = effects.normalize(wavdata)
+		# Some audio files are recorded at very low volume
+		# this is a configuration error. Boost the volume and
+		# print a warning
+		if(wavdata.dBFS < -40):
+			wavdata = wavdata.apply_gain(20)
+			print("WARNING: Eval sample volume too low")
 
 		if(add_noise):
 			bg_noise_file = get_random_file(noise_list)
