@@ -13,6 +13,8 @@ def load_audio_file(filename):
 		sound = AudioSegment.from_ogg(filename)
 	elif filename.endswith('.flac'):
 		sound = AudioSegment.from_file(filename, "flac")
+	elif filename.endswith('.m4a'):
+		sound = AudioSegment.from_file(filename, "m4a")
 
 	sound = sound.set_frame_rate(samplerate)
 	sound = sound.set_channels(1)
@@ -22,4 +24,4 @@ def load_audio_file(filename):
 	return sound,duration
 
 
-extension_list=[".wav",".WAV",".mp3",".MP3",".flac",".ogg"]
+extension_list=[".wav",".WAV",".mp3",".MP3",".flac",".ogg",".m4a"]
