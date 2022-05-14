@@ -20,9 +20,8 @@ from os.path import splitext
 def bytes_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
-nyumaya_libpath = os.path.join("./nyumaya_audio_recognition/python/src/",default_libpath)
-lib_extractor = FeatureExtractor(nyumaya_libpath,nfft=512,melcount=40,
-	sample_rate=samplerate,lowerf=20,upperf=8000,window_len=0.03,shift=0.01)
+nyumaya_libpath = os.path.join(nyumaya_basepath, default_libpath)
+lib_extractor = FeatureExtractor()
 
 def write_example_to_record(meldata,text,writer):
 	example = tf.train.Example(
