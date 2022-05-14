@@ -10,9 +10,9 @@ Suggestions, pull requests are very welcome. Feel free to open an issue.
 
 # Requirements
 
-pip install tensorflow
-pip install numpy
-pip install pydub
+- pip install tensorflow
+- pip install numpy
+- pip install pydub
 
 # Running the benchmark
 
