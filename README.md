@@ -22,7 +22,7 @@ pip install pydub
 3. Populate the noise folder with the demand dataset
 4. Download the scenarios (sh download_scenarios.sh)
 5. Ensure your model is in the nyumaya_audio_recognition/models/Hotword folder
-6. Run the benchmark python3 benchmark.py alexa 2.0.23
+6. Run the benchmark python3 benchmark.py alexa 3.0.35
 7. The results are written to the result_folder
 
 
@@ -44,6 +44,12 @@ English read speech
 Ambient Noises partly taken from public domain sounds of freesound. It consists
 mostly of longer recordings of fireworks, beach sounds, rain, wind, shower etc.
 No intelligible speech is present.
+
+3.radio_tv_test_v1.1 (11.3 hours)
+Mixture of far field and near field recordings of webradios 
+
+4. car_bike_test_v1.1 (13.4 hours)
+Recordings from inside cars and on bikes
 
 ## Adding own scenarios
 
