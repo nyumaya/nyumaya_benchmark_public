@@ -22,6 +22,7 @@ from benchmarkResult import *
 nyumaya_dir =  os.path.join(nyumaya_basepath,"python/src/")
 nyumaya_lib_path = os.path.join(nyumaya_dir,default_libpath)
 
+print("Nyumaya Lib Path: {}".format(nyumaya_lib_path))
 resultQueue = Queue()
 benchmarkResultQueue = Queue()
 
