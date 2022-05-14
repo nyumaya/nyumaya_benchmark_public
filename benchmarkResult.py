@@ -41,7 +41,7 @@ class benchmarkResult:
 				result_file.write("Accuracy noisy ({} db Signal-to-noise ratio) \n".format(noise_levels[idx]))
 				for sensIdx,sens in enumerate(sensitivitys):
 					result_file.write("{:.4f} @ {} \n".format(self.accuracy[idx+1][sensIdx],sens))
-				
+
 				result_file.write("\n")
 
 			for idx,szen in enumerate(szenarios):
@@ -51,5 +51,19 @@ class benchmarkResult:
 					result_file.write("{:.4f} @ {} \n".format(self.falseActivations[idx][sensIdx],sens))
 
 
+			result_file.write("\n\nFalse alarms per hour: Combined\n")
+			#Combined
+			combinedRunHours = 0
+			for idx,szen in enumerate(szenarios):
+				combinedRunHours += self.runHours[idx]
+
+			for sensIdx,sens in enumerate(sensitivitys):
+				fa_sens=0.0
+				for idx,szen in enumerate(szenarios):
+					fa_sens += self.falseActivations[idx][sensIdx]
+
+				result_file.write("{:.4f} @ {} \n".format(fa_sens/float(idx),sens))
+
+			result_file.write("Combined length: {:.4f} hours\n".format(combinedRunHours))
 
 
