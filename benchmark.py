@@ -112,11 +112,12 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx):
 		has_detected_something = False
 
 		for frame in splitdata:
-			features = extractor.signalToMel(frame)
-			prediction = detector.runDetection(features)
+			if(bufsize == len(frame)):
+				features = extractor.signalToMel(frame)
+				prediction = detector.runDetection(features)
 
-			if(prediction != 0 and prediction != -1):
-				has_detected_something = True
+				if(prediction != 0 and prediction != -1):
+					has_detected_something = True
 
 		if(has_detected_something == True):
 			detectionnumber += 1
