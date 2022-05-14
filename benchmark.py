@@ -47,6 +47,36 @@ def get_random_file(file_list):
 def split_sequence(a,seg_length):
 	return [a[x:x+seg_length] for x in range(0,len(a),seg_length)]
 
+def get_framelen(version):
+
+	framelen_v1 = 800
+	framelen_v2 = 640
+	framelen_v3 = 1280
+
+	if version[0] == "1":
+		return framelen_v1
+	elif version[0] == "2":
+		return framelen_v2
+	elif version[0] == "3":
+		return framelen_v3
+	else:
+		print("Unknown version")
+
+def get_melcount(version):
+
+	melcount_v1 = 40
+	melcount_v2 = 40
+	melcount_v3 = 80
+
+	if version[0] == "1":
+		return melcount_v1
+	elif version[0] == "2":
+		return melcount_v2
+	elif version[0] == "3":
+		return melcount_v3
+	else:
+		print("Unknown version")
+
 
 
 # Run positive examples. Each positive example is surrounded by a short
@@ -188,26 +218,21 @@ def run_szenario(szenario,sensitivity,keyword,version,szenIdx,sensIdx):
 	for i,elem in enumerate(dataset):
 
 		mel,text = decode_szenario(elem)
-
-		run_frames += (mel.shape[0] / 40)
-
-		framelen_v2 = 640
-		framelen_v1 = 800
-		framelen = framelen_v1
-		if(bufsize == 5200):
-			framelen = framelen_v2
+		run_frames += (mel.shape[0] / get_melcount(version))
+		framelen = get_framelen(version)
 
 		frames = split_sequence(mel,framelen)
 		for frame in frames:
-			prediction = detector.runDetection(frame)
-			if(prediction != 0 and prediction != -1):
-				try:
-					text = text.numpy().tobytes().decode('utf-8')
-					print("False Alarm:{} {}".format(prediction,text))
-				except:
-					print("Failed to decode text")
+			if(len(frame) == framelen):
+				prediction = detector.runDetection(frame)
+				if(prediction != 0 and prediction != -1):
+					try:
+						text = text.numpy().tobytes().decode('utf-8')
+						print("False Alarm:{} {}".format(prediction,text))
+					except:
+						print("Failed to decode text")
 
-				false_alarms += 1
+					false_alarms += 1
 
 
 	print("False Alarms: {}".format(false_alarms))
