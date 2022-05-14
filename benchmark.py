@@ -103,10 +103,9 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx):
 
 	noise_list = []
 
-	if(add_noise):
-		for noise_folder in noise_folder_list:
-			if(os.path.exists(noise_folder)):
-				noise_list += include_wavs_from_folder(noise_folder)
+	for noise_folder in noise_folder_list:
+		if(os.path.exists(noise_folder)):
+			noise_list += include_wavs_from_folder(noise_folder)
 
 	bufsize = detector.getInputDataSize() * 2
 
@@ -154,6 +153,25 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx):
 			detectionnumber += 1
 
 		samplenumber += 1
+
+		# Test: Run long pauses in between activations
+		# Use random files from the demand dataset
+		if(True):
+			wavdata = get_random_file(noise_list)
+			wavdata,_ = load_audio_file(wavdata)
+			if(not wavdata):
+				#Better abort than get a wrong result
+				print("Could not load file {}".format(f))
+				exit(0)
+
+			wavdata = wavdata.get_array_of_samples().tobytes()
+			splitdata = split_sequence(wavdata,bufsize)
+
+			for frame in splitdata:
+				if(bufsize == len(frame)):
+					features = extractor.signalToMel(frame)
+					prediction = detector.runDetection(features)
+
 	accuracy = detectionnumber / samplenumber
 
 	result = {"type": "accuracy","noiseIdx":noiseIdx,"sensIdx": sensIdx,"value":accuracy}
