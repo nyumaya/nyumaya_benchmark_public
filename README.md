@@ -10,9 +10,9 @@ Suggestions, pull requests are very welcome. Feel free to open an issue.
 
 # Requirements
 
-pip install tensorflow
-pip install numpy
-pip install pydub
+- pip install tensorflow
+- pip install numpy
+- pip install pydub
 
 # Running the benchmark
 
@@ -22,7 +22,7 @@ pip install pydub
 3. Populate the noise folder with the demand dataset
 4. Download the scenarios (sh download_scenarios.sh)
 5. Ensure your model is in the nyumaya_audio_recognition/models/Hotword folder
-6. Run the benchmark python3 benchmark.py alexa 2.0.23
+6. Run the benchmark python3 benchmark.py alexa 3.0.35
 7. The results are written to the result_folder
 
 
@@ -34,7 +34,7 @@ reasons the audio is preprocessed and the extracted features are
 stored in a tfrecord file. This way we can evaluate different scenarios
 quickly and efficienlty.
 
-Currently two scenarios are availabled
+Currently four scenarios are availabled
 
 1. libri_test_v1.0 (8.5 hours)
 Test part of the LibriTTS dataset(https://research.google/tools/datasets/libri-tts/)
@@ -44,6 +44,12 @@ English read speech
 Ambient Noises partly taken from public domain sounds of freesound. It consists
 mostly of longer recordings of fireworks, beach sounds, rain, wind, shower etc.
 No intelligible speech is present.
+
+3. radio_tv_test_v1.1 (11.3 hours)
+Mixture of far field and near field recordings of webradios 
+
+4. car_bike_test_v1.1 (13.4 hours)
+Recordings from inside cars and on bikes
 
 ## Adding own scenarios
 
