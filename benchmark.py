@@ -159,12 +159,18 @@ def run_good(keyword,add_noise,version,noiseIdx,sensIdx):
 		# Use random files from the demand dataset
 		if(True):
 			wavdata = get_random_file(noise_list)
-			wavdata,_ = load_audio_file(wavdata)
+			wavdata,duration = load_audio_file(wavdata)
 			if(not wavdata):
 				#Better abort than get a wrong result
 				print("Could not load file {}".format(f))
 				exit(0)
 
+			#Choose between on second and 3 minutes
+			wavdur = randint(1*1000,180*1000)
+			if(wavdur > duration*1000):
+				wavdur = duration
+
+			wavdata = wavdata[0:wavdur]
 			wavdata = wavdata.get_array_of_samples().tobytes()
 			splitdata = split_sequence(wavdata,bufsize)
 
