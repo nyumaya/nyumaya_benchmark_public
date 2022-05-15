@@ -17,6 +17,8 @@ from auto_platform import default_libpath
 from random import shuffle
 from os.path import splitext
 
+version='v3.0'
+
 def bytes_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
@@ -34,7 +36,7 @@ def write_example_to_record(meldata,text,writer):
 	)
 	writer.write(example.SerializeToString())
 
-def make_librispeech(in_dir):
+def make_librispeech(in_dir,recordName,normalize,db_change):
 
 	promptlist = []
 
@@ -50,16 +52,19 @@ def make_librispeech(in_dir):
 
 	shuffle(promptlist)
 
-	record_name = os.path.join(szenario_basepath,"libri_test_v1.0.tfrecords")
+	record_name = os.path.join(szenario_basepath,recordName)
 	with tf.io.TFRecordWriter(record_name) as writer:
 		for line in promptlist:
 			fpath,text = line.strip().split("|")
 			text = text.encode('utf-8')
 			wavdata,_ = load_audio_file(fpath)
+			if(normalize):
+				wavdata = wavdata.apply_gain(db_change)
+
 			wavdata = wavdata.get_array_of_samples()
 			wavdata = np.asarray(wavdata, dtype = np.int16)
 			meldata = lib_extractor.signalToMel(wavdata.tobytes())
-			meldata = np.reshape(meldata, (-1,40))
+			meldata = np.reshape(meldata, (-1,80))
 			write_example_to_record(meldata,text,writer)
 
 # Take all audio files from a folder and
@@ -81,25 +86,30 @@ def make_folder(in_dir,record_name):
 	with tf.io.TFRecordWriter(record_path) as writer:
 		for line in promptlist:
 			print(line)
-			sound,duration = load_audio_file(line)
-			print("Duration: {}".format(duration))
 
-			#Cut into 20 second slices
-			slices = sound[0:-1:20*1000]
-			for index,s in enumerate(slices):
-				wavdata = s.get_array_of_samples()
-				wavdata = np.asarray(wavdata, dtype = np.int16)
-				meldata = lib_extractor.signalToMel(wavdata.tobytes())
-				meldata = np.reshape(meldata, (-1,40))
-				text = "".encode('utf-8')
-				write_example_to_record(meldata,text,writer)
+			try:
+				sound,duration = load_audio_file(line)
+				print("Duration: {}".format(duration))
+
+				#Cut into 20 second slices
+				slices = sound[0:-1:20*1000]
+				for index,s in enumerate(slices):
+					wavdata = s.get_array_of_samples()
+					wavdata = np.asarray(wavdata, dtype = np.int16)
+					meldata = lib_extractor.signalToMel(wavdata.tobytes())
+					meldata = np.reshape(meldata, (-1,80))
+					text = "".encode('utf-8')
+					write_example_to_record(meldata,text,writer)
+			except:
+				print("Failed to make sample")
+
 
 #Uncomment to run
-#make_librispeech("./LibriTTS/test-clean/")
-
-
-#Uncomment to run
-#make_folder("./myfolder","ambient_test_v1.0.tfrecords")
+make_folder("./myfolder","ambient_test_v1.0.tfrecords")
+make_librispeech("./LibriTTS/test-clean/","libri_test_" + version + ".tfrecords",False,0)
+#make_librispeech("./LibriTTS/test-clean/","libri_test_plus10db_" + version + ".tfrecords",True,10)
+#make_librispeech("./LibriTTS/test-clean/","libri_test_minus10db_" + version + ".tfrecords",True,-10)
+#make_librispeech("./LibriTTS/test-clean/","libri_test_minus20db_" + version + ".tfrecords",True,-20)
 
 
 
